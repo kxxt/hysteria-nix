@@ -34,6 +34,16 @@ with lib.types;
                 format.generate "hysteria-${type}-config.yaml" cfg.settings
               else
                 cfg.settingsFile;
+            getPort = address: lib.toInt (builtins.elemAt (builtins.split ":" address) 2);
+            ports = mkIf (type == "server" && cfg.openFirewall) (
+              optionals (cfg.settings != null) (
+                [ (getPort cfg.settings.listen) ]
+                ++ (optionals (cfg.settings.masquerade != null) [
+                  (getPort cfg.settings.masquerade.listenHTTP)
+                  (getPort cfg.settings.masquerade.listenHTTPS)
+                ])
+              )
+            );
           in
           {
             boot.kernel.sysctl = mkIf (type == "client") (
@@ -43,19 +53,8 @@ with lib.types;
               }
             );
 
-            networking.firewall.allowedTCPPorts =
-              let
-                getPort = address: lib.toInt (builtins.elemAt (builtins.split ":" address) 2);
-              in
-              mkIf (type == "server" && cfg.openFirewall) (
-                optionals (cfg.settings != null) (
-                  [ (getPort cfg.settings.listen) ]
-                  ++ (optionals (cfg.settings.masquerade != null) [
-                    (getPort cfg.settings.masquerade.listenHTTP)
-                    (getPort cfg.settings.masquerade.listenHTTPS)
-                  ])
-                )
-              );
+            networking.firewall.allowedTCPPorts = ports;
+            networking.firewall.allowedUDPPorts = ports;
 
             security.wrappers."hysteria-${type}" = rec {
               owner = cfg.user;
