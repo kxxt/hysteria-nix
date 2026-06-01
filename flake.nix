@@ -16,7 +16,7 @@ rec {
       type = "github";
       owner = "apernet";
       repo = "hysteria";
-      ref = "app/v2.6.5";
+      ref = "app/v2.9.2";
       flake = false;
     };
   };
@@ -55,7 +55,7 @@ rec {
             inherit platforms src;
             inherit (self.inputs.src) lastModifiedDate rev;
             version = pkgs.lib.removePrefix "app/v" inputs.src.ref;
-            vendorHash = "sha256-hjfQhV8K1rrcsL2oJWXJtMiEbZ/oxv3gc0rKHVjQiTE=";
+            vendorHash = "sha256-kAPijL+wblFvzF1efKUUSDMDJqYtDt5B44aXhImOd78=";
           };
 
           options = options-nix.lib.mkOptionScript {
